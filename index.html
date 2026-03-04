@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,61 +7,70 @@
 <style>
 body {
   margin: 0;
-  background: #f2f2f2;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg,#0f0f0f,#1c1c1e);
+  font-family: -apple-system,BlinkMacSystemFont,sans-serif;
+  color: white;
   text-align: center;
 }
 
 h1 {
   margin-top: 40px;
   font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
 .card {
   width: 85%;
-  margin: 30px auto;
+  margin: 40px auto;
   padding: 30px;
-  border-radius: 20px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  transition: 0.3s ease;
+  border-radius: 25px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
   position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
 }
 
 .confidential {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .description {
   margin-top: 10px;
   font-size: 14px;
-  color: #666;
+  opacity: 0.7;
 }
 
-.overlay {
+.mask {
   position: absolute;
   inset: 0;
-  border-radius: 20px;
-  background: black;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.9),
+    rgba(0,0,0,0.0) 40%,
+    rgba(0,0,0,0.0) 60%,
+    rgba(0,0,0,0.9)
+  );
   opacity: 0;
-  transition: 0.3s ease;
+  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
 .stats {
   margin-top: 20px;
-  font-size: 14px;
-  color: #444;
+  font-size: 13px;
+  opacity: 0.6;
 }
 
 button {
   margin-top: 40px;
   width: 85%;
   padding: 18px;
-  border-radius: 15px;
+  border-radius: 18px;
   border: none;
-  background: #ff3b30;
+  background: linear-gradient(90deg,#ff3b30,#ff9500);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -71,20 +80,18 @@ button {
 
 <body>
 
-<h1>Privacy Screen Demo</h1>
+<h1>Privacy Screen</h1>
 
 <div class="card" id="card">
-  <div class="overlay" id="overlay"></div>
+  <div class="mask" id="mask"></div>
   <div class="confidential">🔒 Confidential</div>
   <div class="description">
-    This content is only visible when your phone faces you directly.
+    Visible only at correct viewing angle
   </div>
 </div>
 
 <div class="stats">
-  Pitch: <span id="pitch">0</span>° <br>
-  Roll: <span id="roll">0</span>° <br>
-  Darkness: <span id="darkness">0</span>%
+  Roll: <span id="roll">0</span>°
 </div>
 
 <button onclick="startDemo()">Start Demo</button>
@@ -96,10 +103,7 @@ async function startDemo() {
 
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
     const permission = await DeviceOrientationEvent.requestPermission();
-    if (permission !== "granted") {
-      alert("Permission denied");
-      return;
-    }
+    if (permission !== "granted") return;
   }
 
   active = true;
@@ -107,19 +111,16 @@ async function startDemo() {
   window.addEventListener("deviceorientation", (event) => {
     if (!active) return;
 
-    const pitch = event.beta || 0;
     const roll = event.gamma || 0;
+    document.getElementById("roll").innerText = roll.toFixed(1);
 
-    document.getElementById("pitch").innerText = pitch.toFixed(2);
-    document.getElementById("roll").innerText = roll.toFixed(2);
+    const intensity = Math.min(Math.abs(roll) / 35, 1);
 
-    const tiltAmount = Math.min(Math.abs(roll) / 45, 1);
-    const darkness = tiltAmount * 0.85;
+    document.getElementById("mask").style.opacity = intensity;
 
-    document.getElementById("darkness").innerText =
-      Math.round(darkness * 100);
-
-    document.getElementById("overlay").style.opacity = darkness;
+    // subtle 3D tilt effect
+    document.getElementById("card").style.transform =
+      `rotateY(${roll/6}deg)`;
   });
 }
 </script>
