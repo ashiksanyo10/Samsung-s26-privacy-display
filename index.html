@@ -32,23 +32,37 @@
 <body>
 
 <div id="screen">Move your phone 👀</div>
-
-<script>
+ <script>
   const screen = document.getElementById("screen");
 
-  if (window.DeviceOrientationEvent) {
-    window.addEventListener("deviceorientation", function(event) {
-      const tilt = Math.abs(event.gamma);
+  async function start() {
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== "granted") {
+          screen.innerText = "Permission denied";
+          return;
+        }
+      } catch (e) {
+        screen.innerText = "Permission error";
+        return;
+      }
+    }
+
+    window.addEventListener("deviceorientation", (event) => {
+      const tilt = Math.abs(event.gamma || 0);
+
       if (tilt > 20) {
         screen.style.opacity = "0.2";
-        screen.innerText = "Privacy Mode Activated 🔒";
+        screen.innerText = "Privacy Mode 🔒";
       } else {
         screen.style.opacity = "1";
-        screen.innerText = "Move your phone 👀";
+        screen.innerText = "Safe View 👀";
       }
     });
   }
-</script>
 
-</body>
-</html>
+  screen.innerText = "Tap to Start";
+
+  document.body.addEventListener("click", start, { once: true });
+</script>
