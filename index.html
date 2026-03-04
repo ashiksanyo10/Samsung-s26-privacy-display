@@ -1,68 +1,128 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
-  <title>Privacy Screen Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial;
-      text-align: center;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Screen Demo</title>
 
-    #screen {
-      width: 90%;
-      height: 60%;
-      background: #111;
-      border-radius: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      transition: 0.3s;
-    }
-  </style>
+<style>
+body {
+  margin: 0;
+  background: #f2f2f2;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 40px;
+  font-weight: 600;
+}
+
+.card {
+  width: 85%;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: 0.3s ease;
+  position: relative;
+}
+
+.confidential {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.description {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: black;
+  opacity: 0;
+  transition: 0.3s ease;
+  pointer-events: none;
+}
+
+.stats {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #444;
+}
+
+button {
+  margin-top: 40px;
+  width: 85%;
+  padding: 18px;
+  border-radius: 15px;
+  border: none;
+  background: #ff3b30;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+</style>
 </head>
+
 <body>
 
-<div id="screen">Move your phone 👀</div>
- <script>
-  const screen = document.getElementById("screen");
+<h1>Privacy Screen Demo</h1>
 
-  async function start() {
-    if (typeof DeviceOrientationEvent.requestPermission === "function") {
-      try {
-        const permission = await DeviceOrientationEvent.requestPermission();
-        if (permission !== "granted") {
-          screen.innerText = "Permission denied";
-          return;
-        }
-      } catch (e) {
-        screen.innerText = "Permission error";
-        return;
-      }
+<div class="card" id="card">
+  <div class="overlay" id="overlay"></div>
+  <div class="confidential">🔒 Confidential</div>
+  <div class="description">
+    This content is only visible when your phone faces you directly.
+  </div>
+</div>
+
+<div class="stats">
+  Pitch: <span id="pitch">0</span>° <br>
+  Roll: <span id="roll">0</span>° <br>
+  Darkness: <span id="darkness">0</span>%
+</div>
+
+<button onclick="startDemo()">Start Demo</button>
+
+<script>
+let active = false;
+
+async function startDemo() {
+
+  if (typeof DeviceOrientationEvent.requestPermission === "function") {
+    const permission = await DeviceOrientationEvent.requestPermission();
+    if (permission !== "granted") {
+      alert("Permission denied");
+      return;
     }
-
-    window.addEventListener("deviceorientation", (event) => {
-      const tilt = Math.abs(event.gamma || 0);
-
-      if (tilt > 20) {
-        screen.style.opacity = "0.2";
-        screen.innerText = "Privacy Mode 🔒";
-      } else {
-        screen.style.opacity = "1";
-        screen.innerText = "Safe View 👀";
-      }
-    });
   }
 
-  screen.innerText = "Tap to Start";
+  active = true;
 
-  document.body.addEventListener("click", start, { once: true });
+  window.addEventListener("deviceorientation", (event) => {
+    if (!active) return;
+
+    const pitch = event.beta || 0;
+    const roll = event.gamma || 0;
+
+    document.getElementById("pitch").innerText = pitch.toFixed(2);
+    document.getElementById("roll").innerText = roll.toFixed(2);
+
+    const tiltAmount = Math.min(Math.abs(roll) / 45, 1);
+    const darkness = tiltAmount * 0.85;
+
+    document.getElementById("darkness").innerText =
+      Math.round(darkness * 100);
+
+    document.getElementById("overlay").style.opacity = darkness;
+  });
+}
 </script>
+
+</body>
+</html>
