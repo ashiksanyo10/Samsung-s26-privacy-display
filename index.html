@@ -98,30 +98,39 @@ button {
 
 <script>
 let active = false;
+let currentOpacity = 0;
 
 async function startDemo() {
 
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
-    const permission = await DeviceOrientationEvent.requestPermission();
-    if (permission !== "granted") return;
+    try {
+      const permission = await DeviceOrientationEvent.requestPermission();
+      if (permission !== "granted") return;
+    } catch (e) {
+      alert("Permission error");
+      return;
+    }
   }
 
   active = true;
 
-  window.addEventListener("deviceorientation", (event) => {
-    if (!active) return;
+  window.addEventListener("deviceorientation", handleOrientation);
+}
 
-    const roll = event.gamma || 0;
-    document.getElementById("roll").innerText = roll.toFixed(1);
+function handleOrientation(event) {
+  if (!active) return;
 
-    const intensity = Math.min(Math.abs(roll) / 35, 1);
+  const roll = event.gamma ?? 0;
 
-    document.getElementById("mask").style.opacity = intensity;
+  // Show live value for debugging
+  document.getElementById("roll").innerText = roll.toFixed(2);
 
-    // subtle 3D tilt effect
-    document.getElementById("card").style.transform =
-      `rotateY(${roll/6}deg)`;
-  });
+  const targetOpacity = Math.min(Math.abs(roll) / 35, 1);
+
+  // Smooth interpolation (makes it feel premium)
+  currentOpacity += (targetOpacity - currentOpacity) * 0.15;
+
+  document.getElementById("mask").style.opacity = currentOpacity;
 }
 </script>
 
