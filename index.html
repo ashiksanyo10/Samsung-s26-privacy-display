@@ -97,40 +97,28 @@ button {
 <button onclick="startDemo()">Start Demo</button>
 
 <script>
-let active = false;
-let currentOpacity = 0;
-
-async function startDemo() {
-
-  if (typeof DeviceOrientationEvent.requestPermission === "function") {
-    try {
-      const permission = await DeviceOrientationEvent.requestPermission();
-      if (permission !== "granted") return;
-    } catch (e) {
-      alert("Permission error");
-      return;
-    }
-  }
-
-  active = true;
-
-  window.addEventListener("deviceorientation", handleOrientation);
-}
-
 function handleOrientation(event) {
   if (!active) return;
 
   const roll = event.gamma ?? 0;
 
-  // Show live value for debugging
   document.getElementById("roll").innerText = roll.toFixed(2);
 
-  const targetOpacity = Math.min(Math.abs(roll) / 35, 1);
+  const intensity = Math.min(Math.abs(roll) / 45, 1);
 
-  // Smooth interpolation (makes it feel premium)
-  currentOpacity += (targetOpacity - currentOpacity) * 0.15;
+  const mask = document.getElementById("mask");
 
-  document.getElementById("mask").style.opacity = currentOpacity;
+  const shift = roll * 2;
+
+  mask.style.background = `
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.95),
+      rgba(0,0,0,0.0) ${40 + shift}%,
+      rgba(0,0,0,0.0) ${60 + shift}%,
+      rgba(0,0,0,0.95)
+    )
+  `;
 }
 </script>
 
