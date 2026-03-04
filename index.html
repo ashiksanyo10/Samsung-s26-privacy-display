@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Privacy Screen Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    #screen {
+      width: 90%;
+      height: 60%;
+      background: #111;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      transition: 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+<div id="screen">Move your phone 👀</div>
+
+<script>
+  const screen = document.getElementById("screen");
+
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener("deviceorientation", function(event) {
+      const tilt = Math.abs(event.gamma);
+      if (tilt > 20) {
+        screen.style.opacity = "0.2";
+        screen.innerText = "Privacy Mode Activated 🔒";
+      } else {
+        screen.style.opacity = "1";
+        screen.innerText = "Move your phone 👀";
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
